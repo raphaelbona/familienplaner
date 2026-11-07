@@ -1,0 +1,26 @@
+{
+  "name": "familienplaner",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Orchestrierungs-Skripte für Docker, Tests und Security-Scans. Kein eigenständiges Paket.",
+  "scripts": {
+    "up": "docker compose up -d --build",
+    "down": "docker compose down",
+    "reset": "docker compose down -v",
+    "logs": "docker compose logs -f",
+    "migrate": "docker compose exec backend alembic upgrade head",
+    "migrate:new": "docker compose exec backend alembic revision --autogenerate -m",
+
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "backend\\.venv\\Scripts\\python.exe -m pytest backend",
+    "test:frontend": "npm --prefix frontend run test",
+
+    "lint": "npm run lint:backend && npm run lint:frontend",
+    "lint:backend": "backend\\.venv\\Scripts\\python.exe -m ruff check backend/app backend/tests",
+    "lint:frontend": "npm --prefix frontend run lint",
+
+    "security": "npm run security:backend && npm run security:frontend",
+    "security:backend": "backend\\.venv\\Scripts\\python.exe -m bandit -c backend/pyproject.toml -r backend/app -q && backend\\.venv\\Scripts\\python.exe -m pip_audit -r backend/requirements.txt --ignore-vuln PYSEC-2026-1325",
+    "security:frontend": "npm --prefix frontend run audit"
+  }
+}

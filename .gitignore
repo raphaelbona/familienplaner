@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
+frontend/src/sw.js
+frontend/src/sw.d.ts
+
+# Env
+.env
+!.env.example
+
+# Editors/OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Docker
+db_data/
+
+# Cloud/infra credentials (kubeconfig downloads, OpenStack clouds.yaml/openrc)
+*kubeconfig*
+*clouds.yaml
+*openrc*
+# Google OAuth client downloads (contain the client secret)
+client_secret*.json

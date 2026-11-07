@@ -1,0 +1,70 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: familienplaner
+      POSTGRES_PASSWORD: familienplaner
+      POSTGRES_DB: familienplaner
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U familienplaner"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: ./backend
+    env_file: ./backend/.env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "8000:8000"
+    volumes:
+      - uploads_data:/app/uploads
+
+  worker:
+    build: ./backend
+    env_file: ./backend/.env
+    command: ["python", "-m", "app.worker.sync_worker"]
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - uploads_data:/app/uploads
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8090:80"
+    depends_on:
+      - backend
+
+  # Optionaler lokaler Vision-LLM-Provider (kein Abo, keine Cloud).
+  # Nicht Teil des Standard-Starts: `docker compose --profile local-llm up -d`
+  # Danach im Container das Modell laden: `docker compose exec ollama ollama pull llama3.2-vision`
+  # und in backend/.env VISION_PROVIDER=ollama setzen.
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["local-llm"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
+volumes:
+  db_data:
+  uploads_data:
+  ollama_data:

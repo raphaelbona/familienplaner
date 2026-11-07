@@ -1,0 +1,16 @@
+-r requirements.txt
+
+# IMPORTANT: install this file with URLLIB3_NO_OVERRIDE=1 set (see backend/Dockerfile
+# and the project README) -- caldav -> niquests -> urllib3-future otherwise overwrites
+# the real urllib3 package on disk, breaking testcontainers/docker-py (needed below).
+urllib3>=2,<3
+
+pytest==8.3.3
+pytest-cov==6.0.0
+httpx==0.27.2
+testcontainers[postgres]==4.8.2
+
+ruff==0.7.2
+bandit==1.7.10
+pip-audit==2.7.3
+pip-system-certs==4.0  # nutzt den Windows-Zertifikatsspeicher; ohne das schlägt pip-audit hinter SSL-Inspektion fehl

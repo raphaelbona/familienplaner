@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "frontend-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "frontend", "run", "dev"],
+      "port": 5173
+    },
+    {
+      "name": "docker-frontend",
+      "url": "http://localhost:8090"
+    },
+    {
+      "name": "docker-backend-docs",
+      "url": "http://localhost:8000/docs"
+    }
+  ]
+}

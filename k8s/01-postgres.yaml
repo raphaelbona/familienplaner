@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-credentials
+  namespace: familienplaner
+type: Opaque
+stringData:
+  POSTGRES_USER: familienplaner
+  POSTGRES_PASSWORD: CHANGE_ME
+  POSTGRES_DB: familienplaner
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: db-data
+  namespace: familienplaner
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+  namespace: familienplaner
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels: { app: db }
+  template:
+    metadata:
+      labels: { app: db }
+    spec:
+      containers:
+        - name: db
+          image: postgres:16-alpine
+          envFrom:
+            - secretRef: { name: postgres-credentials }
+          env:
+            # Fresh Cinder volumes ship a lost+found dir at the mount root, which
+            # makes initdb refuse to initialize directly into it; use a subdirectory.
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/postgresql/data
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "familienplaner"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+      volumes:
+        - name: db-data
+          persistentVolumeClaim: { claimName: db-data }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  namespace: familienplaner
+spec:
+  selector: { app: db }
+  ports:
+    - port: 5432
+      targetPort: 5432

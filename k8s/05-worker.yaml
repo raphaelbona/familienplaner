@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  namespace: familienplaner
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: worker }
+  template:
+    metadata:
+      labels: { app: worker }
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: worker
+          image: registry.example.com/your-user/familienplaner-backend:latest
+          command: ["python", "-m", "app.worker.sync_worker"]
+          envFrom:
+            - secretRef: { name: backend-env }
